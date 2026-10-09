@@ -34,3 +34,7 @@ Imagens obtidas das páginas Wikipedia/Wikimedia abaixo. Personagens e imagens p
 - Camiseta do Cebolinha: https://en.wikipedia.org/wiki/Jimmy_Five — [arquivo original](https://upload.wikimedia.org/wikipedia/en/6/64/Jimmy_Five.png)
 - Camiseta do Bart: https://en.wikipedia.org/wiki/Bart_Simpson — [arquivo original](https://upload.wikimedia.org/wikipedia/en/a/aa/Bart_Simpson_200px.png)
 - Barney: https://en.wikipedia.org/wiki/Barney_%26_Friends — [arquivo original](https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f8/Barney_show_in_Qatar_%284340543390%29.jpg/250px-Barney_show_in_Qatar_%284340543390%29.jpg)
+
+## Impostor Festa
+
+Jogo adaptado a partir dos arquivos públicos de https://impostor-festa.vercel.app/, fornecido pelo usuário. A lógica de sala e a conexão Supabase original foram preservadas. A ilustração vetorial do catálogo é própria, com ícone Lucide.

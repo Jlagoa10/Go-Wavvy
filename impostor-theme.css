@@ -1,0 +1,36 @@
+body[data-game=impostor-festa] .impostor-guide{display:grid;gap:12px;padding:18px}
+.impostor-guide>div{padding:16px;background:#2c203b;border:1px solid #6d995c35;border-radius:15px;gap:13px;align-items:flex-start;font-size:14px;line-height:1.65}
+.impostor-guide .e{display:grid;place-items:center;flex-shrink:0;width:36px;height:36px;border-radius:11px;background:#b9ee8a12;color:var(--accent)}
+.impostor-guide .e .ui-icon{width:22px;height:22px}
+body[data-game=impostor-festa] .hdr{justify-content:space-between}
+body[data-game=impostor-festa] .roomcode{letter-spacing:.16em}
+body[data-game=impostor-festa] .row{padding:18px;border:1px solid #59416d;background:linear-gradient(130deg,#2b1b3d,#21172d);border-radius:17px}
+body[data-game=impostor-festa] .row .t{font-family:Outfit;font-size:18px;line-height:1.3}
+body[data-game=impostor-festa] .row .s{margin-top:5px;line-height:1.5;font-size:12px}
+body[data-game=impostor-festa] .stepper{padding:4px;gap:4px;background:#160f22}
+body[data-game=impostor-festa] .stepper button{width:40px;height:44px;border:0;background:#372544}
+body[data-game=impostor-festa] .chips{gap:8px}
+body[data-game=impostor-festa] .chip{min-height:44px;border-radius:12px;padding:10px 13px;font-size:13px;display:inline-flex;gap:6px;align-items:center}
+body[data-game=impostor-festa] .player{font-size:13px;padding:8px 11px;border-radius:12px;gap:8px}
+body[data-game=impostor-festa] .stage{min-height:340px;margin:4px 0 8px}
+body[data-game=impostor-festa] .card{border:0;box-shadow:none;border-radius:24px}
+body[data-game=impostor-festa] .face{border-radius:24px;padding:24px;gap:16px}
+body[data-game=impostor-festa] .back{background:radial-gradient(ellipse at top,#4e355c,#21152f);border:1px solid #b9ee8a65;box-shadow:inset 0 0 0 9px #ffffff04,0 18px 35px #0002}
+body[data-game=impostor-festa] .back .q{color:var(--accent);font-family:Outfit;font-size:130px;text-shadow:0 7px 0 #66834655;line-height:1}
+body[data-game=impostor-festa] .back .tap{font-family:Outfit;font-size:18px}
+body[data-game=impostor-festa] .front{background:linear-gradient(145deg,#fffbed,#eee3cf);box-shadow:inset 0 0 0 9px #ffffff80}
+body[data-game=impostor-festa] .cf .big{font-family:Outfit;font-weight:800;font-size:clamp(32px,8vw,48px)}
+body[data-game=impostor-festa] .cf .box{background:#ddd5c370;border:1px solid #c0ae9188;border-radius:12px;font-size:15px}
+body[data-game=impostor-festa] .cf .note{font-size:14px;line-height:1.6;opacity:.8}
+body[data-game=impostor-festa] .peek{display:flex;align-items:center;justify-content:center;gap:10px;min-height:56px;border:1px solid #b9ee8a55;font-size:14px;font-family:'DM Sans',sans-serif;background:#b9ee8a0a}
+body[data-game=impostor-festa] #share{display:inline-flex;align-items:center;justify-content:center;gap:9px}
+body[data-game=impostor-festa] .qcard .pair{font-size:17px;line-height:1.65}
+body[data-game=impostor-festa] .qcard .pair b{font-weight:700;font-size:23px;color:#623d80}
+body[data-game=impostor-festa] .qcard .q{font-family:Outfit;font-weight:700;line-height:1.25}
+body[data-game=impostor-festa] .opts{gap:10px}
+body[data-game=impostor-festa] .opt{min-height:60px;border-width:1px;padding:14px;font-size:14px}
+body[data-game=impostor-festa] .panel{padding:20px;border:1px solid #533768;background:linear-gradient(135deg,#291c38,#20142e);border-radius:18px}
+body[data-game=impostor-festa] .verdict{font-family:Outfit;font-weight:800;line-height:1.2}
+body[data-game=impostor-festa] .switch input:checked+span{background:var(--accent)}
+body[data-game=impostor-festa] .game-figure>span .ui-icon{width:36px;height:36px}
+@media(max-width:420px){body[data-game=impostor-festa] .row{padding:14px;gap:8px}body[data-game=impostor-festa] .row .t{font-size:16px}body[data-game=impostor-festa] .impostor-guide{padding:12px}body[data-game=impostor-festa] .impostor-guide>div{padding:15px;font-size:13px}body[data-game=impostor-festa] .stage{min-height:320px}body[data-game=impostor-festa] .opts{grid-template-columns:1fr}body[data-game=impostor-festa] .qcard{padding:20px}}
