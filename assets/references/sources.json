@@ -1,0 +1,130 @@
+[
+  {
+    "name": "Bob Esponja",
+    "page": "SpongeBob_SquarePants_(character)",
+    "url": "https://en.wikipedia.org/wiki/SpongeBob_SquarePants_(character)",
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a2/SpongeBob_character.svg/960px-SpongeBob_character.svg.png",
+    "status": 200,
+    "src": "assets/references/character-0.png"
+  },
+  {
+    "name": "Patrick Estrela",
+    "page": "Patrick_Star",
+    "url": "https://en.wikipedia.org/wiki/Patrick_Star",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/2/28/Patrick_Star_character.png",
+    "status": 200,
+    "src": "assets/references/character-1.png"
+  },
+  {
+    "name": "Shrek",
+    "page": "Shrek_(character)",
+    "url": "https://en.wikipedia.org/wiki/Shrek_(character)",
+    "image": "https://upload.wikimedia.org/wikipedia/en/4/4d/Shrek_%28character%29.png",
+    "status": 200,
+    "src": "assets/references/character-2.png"
+  },
+  {
+    "name": "Smurf",
+    "page": "The_Smurfs",
+    "url": "https://en.wikipedia.org/wiki/The_Smurfs",
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/2020-09-20-Papa_Smurf_%28cropped%29.jpg/250px-2020-09-20-Papa_Smurf_%28cropped%29.jpg",
+    "status": 200,
+    "src": "assets/references/character-3.jpg"
+  },
+  {
+    "name": "Pikachu",
+    "page": "Pikachu",
+    "url": "https://en.wikipedia.org/wiki/Pikachu",
+    "image": "https://upload.wikimedia.org/wikipedia/en/a/a6/Pok%C3%A9mon_Pikachu_art.png",
+    "status": 200,
+    "src": "assets/references/character-4.png"
+  },
+  {
+    "name": "Homer Simpson",
+    "page": "Homer_Simpson",
+    "url": "https://en.wikipedia.org/wiki/Homer_Simpson",
+    "image": "https://upload.wikimedia.org/wikipedia/en/0/02/Homer_Simpson_2006.png",
+    "status": 200,
+    "src": "assets/references/character-5.png"
+  },
+  {
+    "name": "Boné do Mario",
+    "page": "Mario",
+    "url": "https://en.wikipedia.org/wiki/Mario",
+    "image": "https://upload.wikimedia.org/wikipedia/en/5/5c/Mario_by_Shigehisa_Nakaue.png",
+    "status": 200,
+    "src": "assets/references/character-6.png"
+  },
+  {
+    "name": "Boné do Luigi",
+    "page": "Luigi",
+    "url": "https://en.wikipedia.org/wiki/Luigi_(Mario)",
+    "status": 200,
+    "image": "https://upload.wikimedia.org/wikipedia/en/b/be/Luigi_by_Shigehisa_Nakaue.png",
+    "src": "assets/references/character-7.png"
+  },
+  {
+    "name": "Hulk",
+    "page": "Hulk",
+    "url": "https://en.wikipedia.org/wiki/Hulk",
+    "image": "https://upload.wikimedia.org/wikipedia/en/a/aa/Hulk_%28circa_2019%29.png",
+    "status": 200,
+    "src": "assets/references/character-8.png"
+  },
+  {
+    "name": "Garfield",
+    "page": "Garfield_(character)",
+    "url": "https://en.wikipedia.org/wiki/Garfield_(character)",
+    "image": "https://thumb.wikimedia.org/wikipedia/en/thumb/b/bc/Garfield_the_Cat.svg/1280px-Garfield_the_Cat.svg.png",
+    "status": 200,
+    "src": "assets/references/character-9.png"
+  },
+  {
+    "name": "Minion",
+    "page": "Minions_(Despicable_Me)",
+    "url": "https://en.wikipedia.org/wiki/Minions_(Despicable_Me)",
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/41/Minion_sculpture_in_Brisbane%2C_2024.jpg/960px-Minion_sculpture_in_Brisbane%2C_2024.jpg",
+    "status": 200,
+    "src": "assets/references/character-10.jpg"
+  },
+  {
+    "name": "Sonic",
+    "page": "Sonic_the_Hedgehog_(character)",
+    "url": "https://en.wikipedia.org/wiki/Sonic_the_Hedgehog_(character)",
+    "image": "https://upload.wikimedia.org/wikipedia/en/f/f4/Sonic_modern_and_classic_designs.png",
+    "status": 200,
+    "src": "assets/references/character-11.png"
+  },
+  {
+    "name": "Vestido da Mônica",
+    "page": "Monica_(Monica%27s_Gang)",
+    "url": "https://en.wikipedia.org/wiki/Monica_(Monica%27s_Gang)",
+    "image": "https://upload.wikimedia.org/wikipedia/en/0/04/Monica_%28Monica%27s_Gang%29.png",
+    "status": 200,
+    "src": "assets/references/character-12.png"
+  },
+  {
+    "name": "Camiseta do Cebolinha",
+    "page": "Jimmy_Five",
+    "url": "https://en.wikipedia.org/wiki/Jimmy_Five",
+    "image": "https://upload.wikimedia.org/wikipedia/en/6/64/Jimmy_Five.png",
+    "status": 200,
+    "src": "assets/references/character-13.png"
+  },
+  {
+    "name": "Camiseta do Bart",
+    "page": "Bart_Simpson",
+    "url": "https://en.wikipedia.org/wiki/Bart_Simpson",
+    "image": "https://upload.wikimedia.org/wikipedia/en/a/aa/Bart_Simpson_200px.png",
+    "status": 200,
+    "src": "assets/references/character-14.png"
+  },
+  {
+    "name": "Barney",
+    "page": "Barney_%26_Friends",
+    "url": "https://en.wikipedia.org/wiki/Barney_%26_Friends",
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f8/Barney_show_in_Qatar_%284340543390%29.jpg/250px-Barney_show_in_Qatar_%284340543390%29.jpg",
+    "status": 200,
+    "src": "assets/references/character-15.jpg"
+  }
+]
