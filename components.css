@@ -1,0 +1,27 @@
+.ui-icon{display:inline-block;width:20px;height:20px;flex:0 0 auto;vertical-align:middle;pointer-events:none}
+[data-icon]{display:inline-flex;align-items:center;justify-content:center}
+button,a{-webkit-tap-highlight-color:transparent}
+button:focus-visible,a:focus-visible{outline:3px solid #f6d576;outline-offset:4px}
+nav button,.filters button,.meta span,.hero-foot span,.art-chips span,.closing a,.player-head button,.player-head a{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.heart{display:grid!important;place-items:center!important;width:44px!important;height:44px!important;min-width:44px;padding:0!important;line-height:0!important;appearance:none;border:1px solid #ffffff35!important;background:#170e3280!important;color:#fff;box-sizing:border-box}
+.heart .ui-icon{width:23px;height:23px;margin:0;stroke-width:1.8}
+.heart[aria-pressed=true]{color:#ff99ca!important;background:#351b46!important;border-color:#ff99ca!important}
+.heart[aria-pressed=true] .ui-icon,#favorites[aria-pressed=true] .ui-icon{fill:currentColor}
+.play>.ui-icon,.primary .ui-icon,.closing a .ui-icon{width:23px;height:23px}
+.meta{flex-wrap:wrap;gap:12px}.meta .ui-icon{width:16px;height:16px}
+.target:after{content:none!important}.target-arrow{position:absolute;right:-8px;top:-31px;display:grid;place-items:center;transform:rotate(-7deg);color:#fff7d7;filter:drop-shadow(0 6px 0 #321754)}.target-arrow .ui-icon{width:90px;height:90px;stroke-width:3.5}
+.player-head{height:auto!important;flex-shrink:0}.player-head>*{min-width:0}.player-head button,.player-head a{min-height:44px}
+body[data-game=bagunca] .games{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:16px}
+body[data-game=bagunca] .games .game{padding:18px!important;border:1px solid #ffffff16!important;border-radius:16px;min-width:0;gap:10px;background:#281a3899;line-height:1.55}
+body[data-game=bagunca] .games .game:last-child{grid-column:1/-1}
+body[data-game=bagunca] .game b{line-height:1.25;overflow-wrap:anywhere}
+body[data-game=bagunca] .game .e{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#ffffff09;color:var(--accent);margin-bottom:4px}
+body[data-game=bagunca] .game .e .ui-icon{width:25px;height:25px}
+.character-reference{display:flex;align-items:center;justify-content:center;gap:20px;min-height:230px;padding:22px 22px 54px;background:radial-gradient(ellipse at center,#fff,#eeeaf4);color:#271937}
+.character-reference img{width:65%;height:210px;object-fit:contain;max-width:260px}
+.character-reference img.hidden-color{filter:grayscale(1)}
+.reference-swatch{width:54px;height:90px;border:3px solid #fff;border-radius:16px;background:repeating-linear-gradient(45deg,#cdc6d9 0 7px,#ede8f3 7px 14px);box-shadow:0 5px 15px #21173525;flex-shrink:0}
+.reference-note{font-size:12px;line-height:1.6;color:var(--muted);margin:10px 0}.reference-note a{color:var(--accent)}
+.duo-scenes .character-reference{gap:8px;padding:15px;min-height:160px}.duo-scenes .character-reference img{height:150px}.duo-scenes .reference-swatch{width:32px;height:65px}
+@media(max-width:700px){.player-head{display:grid!important;grid-template-columns:1fr 1fr;gap:8px!important;padding:12px!important}.player-head #back{grid-row:1;grid-column:1;justify-self:start}.player-head #game-title{grid-row:1;grid-column:2;text-align:right;font-size:16px}.player-head #fullscreen{grid-row:2;grid-column:1}.player-head #external{grid-row:2;grid-column:2}.player-head button,.player-head a{font-size:12px!important;padding:8px!important;gap:6px}#player{height:100dvh;max-height:100dvh;width:100%;max-width:100%;margin:0;border:0;border-radius:0}#player[open]{display:flex;flex-direction:column}#frame{min-height:0;flex:1;width:100%}.player-tip{padding:8px 12px calc(8px + env(safe-area-inset-bottom))!important;font-size:10px!important;margin:0!important}.card-body{padding:23px}.card-body p{line-height:1.7}.closing a{min-height:48px}.filters{gap:8px}.filters button{gap:5px}.filters .ui-icon{width:16px;height:16px}}
+@media(max-width:420px){body[data-game=bagunca] .games{grid-template-columns:1fr;padding:12px}body[data-game=bagunca] .games .game{padding:17px!important}.character-reference{gap:12px;padding-left:14px;padding-right:14px}.duo-scenes{gap:10px}.duo-scenes .character-reference img{height:125px}.duo-scenes .character-reference{padding:10px;min-height:145px}.duo-scenes .reference-swatch{width:23px;height:55px}}
