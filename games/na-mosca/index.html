@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><base href="/games/na-mosca/">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#15121f">
+<title>Na Mosca</title>
+<meta name="description" content="Jogo de palpites para jogar com os amigos, cada um no seu celular.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Figtree:wght@400;600;800&display=swap">
+<style>
+/* Layout: one-screen phone app; paper question card, number pad, row of guess cards, live scoreboard */
+:root {
+  --bg: #15121f;
+  --surface: #221d31;
+  --line: #3a3150;
+  --fg: #f4effc;
+  --muted: #a69dbd;
+  --go: #ffd23f;
+  --go-ink: #1c1606;
+  --win: #3ee6c1;
+  --hot: #ff4d6d;
+  --paper: #f6f1e6;
+  --paper-ink: #1b1726;
+  --display: "Dela Gothic One", "Arial Black", Impact, sans-serif;
+  --body: "Figtree", -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); background: var(--bg); }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 17px;
+  -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none;
+}
+[hidden] { display: none !important; }
+.app { max-width: 480px; margin: 0 auto; min-height: 100%; padding-inline: 16px; padding-block: 16px 28px; display: flex; flex-direction: column; gap: 16px; }
+.screen { display: flex; flex-direction: column; gap: 16px; flex: 1; }
+h1 { font-family: var(--display); font-weight: 400; font-size: 46px; line-height: 1; margin: 0; letter-spacing: .5px; }
+h1 em { font-style: normal; color: var(--go); }
+h2 { font-family: var(--display); font-weight: 400; font-size: 24px; line-height: 1.15; margin: 0; text-wrap: balance; }
+.label { font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.muted { color: var(--muted); margin: 0; line-height: 1.45; }
+.block { display: flex; flex-direction: column; gap: 10px; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+/* header */
+.hdr { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pill { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 12px; font-weight: 800; font-size: 13px; letter-spacing: .06em; color: var(--fg); font-family: var(--body); }
+.pill.code { font-family: var(--display); font-weight: 400; letter-spacing: .12em; color: var(--go); }
+.pill.btn-pill { cursor: pointer; margin-left: auto; }
+.pill.off { border-color: var(--hot); color: var(--hot); }
+
+/* forms */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.input { width: 100%; min-width: 0; background: var(--surface); border: 2px solid var(--line); color: var(--fg); border-radius: 14px; padding: 14px; font: 700 18px var(--body); user-select: text; -webkit-user-select: text; }
+.input::placeholder { color: var(--muted); font-weight: 400; }
+.input.code { font-family: var(--display); font-weight: 400; letter-spacing: .3em; text-transform: uppercase; text-align: center; font-size: 26px; }
+.join-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+.or { text-align: center; color: var(--muted); font-size: 14px; }
+
+.btn { appearance: none; border: 0; border-radius: 18px; padding: 17px 20px; font: 800 18px var(--body); cursor: pointer; width: 100%; color: var(--fg); }
+.btn.go { background: var(--go); color: var(--go-ink); box-shadow: 0 6px 0 #b8901a; }
+.btn.go:active { transform: translateY(4px); box-shadow: 0 2px 0 #b8901a; }
+.btn.hot { background: var(--hot); color: #fff; box-shadow: 0 6px 0 #a3213a; }
+.btn.hot:active { transform: translateY(4px); box-shadow: 0 2px 0 #a3213a; }
+.btn:disabled { opacity: .4; pointer-events: none; }
+.btn.ghost { background: transparent; border: 1px solid var(--line); }
+.btn.small { padding: 12px 16px; font-size: 15px; }
+.btn.auto { width: auto; }
+.link { background: none; border: 0; color: var(--muted); font: 600 14px var(--body); text-decoration: underline; cursor: pointer; padding: 6px; }
+:is(.btn, .chip-opt, .key, .gcard, .input, .link, .pill, .react button):focus-visible { outline: 3px solid var(--win); outline-offset: 2px; }
+.bottom { margin-top: auto; display: flex; flex-direction: column; gap: 12px; }
+
+/* rules */
+.rules { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+.rules ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; line-height: 1.45; }
+.pts { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; align-items: center; }
+.pts b { font-family: var(--display); font-weight: 400; font-size: 20px; color: var(--go); text-align: right; font-variant-numeric: tabular-nums; }
+.overlay { position: fixed; inset: 0; background: rgba(10,8,16,.8); display: flex; align-items: flex-end; justify-content: center; padding: 16px; z-index: 20; }
+.sheet { width: 100%; max-width: 480px; max-height: 90%; overflow: auto; background: var(--bg); border: 1px solid var(--line); border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+
+/* lobby */
+.roomcode { font-family: var(--display); font-size: 64px; letter-spacing: .14em; color: var(--go); line-height: 1; text-align: center; }
+.players { display: flex; flex-wrap: wrap; gap: 8px; }
+.player { display: inline-flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px 6px 6px; font-weight: 700; max-width: 100%; }
+.player .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.player.done { border-color: var(--win); }
+.player.done::after { content: "✓"; color: var(--win); font-weight: 800; }
+.player.wait { opacity: .55; }
+.player .x { background: none; border: 0; color: var(--muted); font-size: 18px; cursor: pointer; padding: 0 2px; }
+.av { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 13px; color: var(--paper-ink); flex: none; }
+.opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip-opt { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 14px; padding: 10px 12px; font: 700 15px var(--body); cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.chip-opt small { font-weight: 400; color: var(--muted); font-size: 12px; }
+.chip-opt[aria-pressed="true"] { background: var(--go); color: var(--go-ink); border-color: var(--go); }
+.chip-opt[aria-pressed="true"] small { color: #5a4a10; }
+.chip-opt:disabled { cursor: default; }
+.chip-opt:disabled:not([aria-pressed="true"]) { opacity: .5; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 10px 14px; }
+.stepper { display: flex; align-items: center; gap: 10px; flex: none; }
+.stepper button { width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font-size: 22px; font-weight: 800; cursor: pointer; }
+.stepper button:disabled { opacity: .3; }
+.stepper output { min-width: 32px; text-align: center; font-family: var(--display); font-size: 22px; font-variant-numeric: tabular-nums; }
+
+/* timer */
+.timer { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; position: relative; }
+.timer i { position: absolute; inset: 0 auto 0 0; background: var(--win); border-radius: 4px; transition: width .25s linear; }
+.timer.low i { background: var(--hot); }
+.secs { font-family: var(--display); font-variant-numeric: tabular-nums; color: var(--muted); }
+.secs.low { color: var(--hot); }
+
+/* question card */
+.qcard { background: var(--paper); color: var(--paper-ink); border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+.qcard .label { color: #6c6480; }
+.qcard .q { font-family: var(--display); font-size: clamp(21px, 6.6vw, 28px); line-height: 1.15; text-wrap: balance; }
+.qcard.mini { padding: 14px 16px; border-radius: 18px; gap: 4px; }
+.qcard.mini .q { font-size: 17px; }
+.lvl { display: inline-flex; gap: 6px; align-items: center; }
+.lvl i { width: 9px; height: 9px; border-radius: 50%; background: #d8cfbd; }
+.lvl i.on { background: #e0472f; }
+
+/* pad */
+.display { background: var(--surface); border: 2px solid var(--line); border-radius: 18px; padding: 12px 16px; display: flex; align-items: baseline; justify-content: space-between; gap: 10px; min-height: 62px; }
+.display .n { font-family: var(--display); font-size: clamp(28px, 9vw, 40px); color: var(--go); font-variant-numeric: tabular-nums; word-break: break-all; }
+.display .n.empty { color: var(--line); }
+.display .u { color: var(--muted); font-weight: 700; flex: none; text-align: right; max-width: 45%; }
+.pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.key { border: 1px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 16px; padding: 13px 0; font: 400 24px var(--display); cursor: pointer; }
+.key:active { background: var(--line); }
+.key.fn { font: 800 17px var(--body); color: var(--muted); }
+.sent { background: var(--surface); border: 2px dashed var(--win); border-radius: 20px; padding: 18px; text-align: center; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+.sent .v { font-family: var(--display); font-size: 34px; color: var(--win); font-variant-numeric: tabular-nums; word-break: break-all; }
+
+/* board */
+.board { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+.gcard { position: relative; border: 2px solid var(--line); background: var(--surface); color: var(--fg); border-radius: 18px; padding: 12px 10px 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; text-align: center; font-family: var(--body); min-width: 0; }
+.gcard .val { font-family: var(--display); font-size: 21px; font-variant-numeric: tabular-nums; word-break: break-all; line-height: 1.1; }
+.gcard .by { font-size: 12px; color: var(--muted); font-weight: 600; word-break: break-word; }
+.gcard .bets { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; min-height: 28px; }
+.gcard .bets .av { width: 24px; height: 24px; font-size: 11px; }
+.gcard.picked { border-color: var(--go); background: #3a3214; }
+.gcard.win { border-color: var(--win); background: #123a33; }
+.gcard.lose { opacity: .45; }
+.gcard:disabled { cursor: default; }
+.gcard .tag { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--win); color: #062a22; border-radius: 999px; padding: 2px 10px; font-weight: 800; font-size: 12px; white-space: nowrap; }
+.gcard.picked .tag { background: var(--go); color: var(--go-ink); }
+
+/* reveal */
+.answer { background: var(--paper); color: var(--paper-ink); border-radius: 24px; padding: 18px; text-align: center; display: flex; flex-direction: column; gap: 4px; }
+.answer .label { color: #6c6480; }
+.answer .q { font-weight: 700; font-size: 15px; color: #4a4258; line-height: 1.35; }
+.answer .big { font-family: var(--display); font-size: clamp(40px, 13vw, 58px); line-height: 1.05; font-variant-numeric: tabular-nums; word-break: break-all; }
+.answer .u { font-weight: 700; color: #6c6480; }
+.badge { align-self: center; background: var(--hot); color: #fff; font-weight: 800; border-radius: 999px; padding: 6px 14px; font-size: 14px; letter-spacing: .06em; text-transform: uppercase; }
+.award { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; display: flex; gap: 12px; align-items: center; }
+.award .e { font-size: 28px; line-height: 1; }
+.award b { display: block; }
+.award span { color: var(--muted); font-size: 14px; }
+
+.scores { display: flex; flex-direction: column; gap: 8px; }
+.score { display: grid; grid-template-columns: 30px 1fr auto auto; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; }
+.score .pos { font-weight: 800; font-size: 18px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.score .nm { font-weight: 700; min-width: 0; display: flex; align-items: center; gap: 8px; }
+.score .nm span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.score .gain { color: var(--win); font-weight: 800; font-variant-numeric: tabular-nums; font-size: 14px; text-align: right; }
+.score .tot { font-family: var(--display); font-size: 20px; font-variant-numeric: tabular-nums; min-width: 2ch; text-align: right; }
+.score.first { border-color: var(--go); }
+.score.first .pos { color: var(--go); }
+.score.me { background: #2b2540; }
+
+.podium { text-align: center; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+.podium .crown { font-size: 60px; line-height: 1; }
+.podium .who { font-family: var(--display); font-size: clamp(32px, 11vw, 48px); color: var(--go); word-break: break-word; line-height: 1.05; }
+
+.wait-note { text-align: center; color: var(--muted); font-weight: 600; padding: 8px; }
+.foot { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+
+/* reactions */
+.react { display: flex; justify-content: center; gap: 8px; }
+.react button { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; font-size: 24px; width: 50px; height: 46px; cursor: pointer; }
+.react button:active { transform: scale(.9); }
+.floaty { position: fixed; bottom: 90px; font-size: 40px; pointer-events: none; z-index: 30; animation: floaty 2.2s ease-out forwards; }
+@keyframes floaty { 0% { transform: translateY(0) scale(.6); opacity: 0; } 15% { opacity: 1; transform: translateY(-40px) scale(1.1); } 100% { transform: translateY(-60vh) scale(1); opacity: 0; } }
+#confetti { position: fixed; inset: 0; pointer-events: none; z-index: 25; width: 100%; height: 100%; }
+
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); font-weight: 800; padding: 12px 18px; border-radius: 14px; z-index: 40; max-width: calc(100% - 32px); text-align: center; }
+
+.pop { animation: pop .45s cubic-bezier(.2,.9,.3,1.3); }
+@keyframes pop { from { transform: scale(.88); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .pop, .floaty { animation: none; } .timer i { transition: none; } }
+</style>
+<link rel="stylesheet" href="../../game-theme.css"><style>:root{--accent:#f9db68;--go:#f9db68;--go-ink:#171025}</style><link rel="stylesheet" href="../../components.css"><script src="../../icons.js"></script><script src="../../references.js"></script></head>
+<body data-game="na-mosca"><a class="wavvy-brand" href="../../" target="_top"><img src="../../logo.png" alt=""><span>go wavvy <b>✦</b></span></a><div class="game-ambient" aria-hidden="true"><span>◎</span></div>
+<canvas id="confetti" hidden></canvas>
+<div class="app">
+
+  <!-- header shown inside a room -->
+  <div class="hdr" id="hdr" hidden>
+    <span class="pill code" id="hdrCode">ABCD</span>
+    <span class="pill" id="hdrRound">Sala de espera</span>
+    <span class="pill off" id="hdrNet" hidden>sem conexão</span>
+    <button class="pill btn-pill" id="hdrRules" type="button">Regras</button>
+  </div>
+
+  <!-- HOME -->
+  <section class="screen" id="s-home">
+    <div class="block">
+      <span class="label">Jogo de palpites</span>
+      <h1>Na <em>Mosca</em></h1>
+      <p class="muted">Cada um no seu celular. Ninguém precisa saber a resposta: chute perto, aposte certo e tente cravar.</p>
+    </div>
+    <div class="rules" id="rulesHome"></div>
+    <div class="field">
+      <label class="label" for="nome">Seu nome</label>
+      <input class="input" id="nome" maxlength="16" autocomplete="nickname" placeholder="Como te chamam?">
+    </div>
+    <div class="field">
+      <label class="label" for="codigo">Entrar numa sala</label>
+      <div class="join-row">
+        <input class="input code" id="codigo" maxlength="4" autocomplete="off" autocapitalize="characters" placeholder="ABCD">
+        <button class="btn go auto" id="entrar" type="button">Entrar</button>
+      </div>
+    </div>
+    <div class="or">ou</div>
+    <button class="btn ghost" id="criar" type="button">Criar sala nova</button>
+    <p class="muted" id="homeErr" style="color:var(--hot)" hidden></p>
+  </section>
+
+  <!-- LOBBY -->
+  <section class="screen" id="s-lobby" hidden>
+    <div class="block" style="align-items:center; text-align:center">
+      <span class="label">Código da sala</span>
+      <div class="roomcode" id="lobbyCode">ABCD</div>
+      <button class="btn ghost small auto" id="share" type="button">Chamar a galera</button>
+    </div>
+    <div class="block">
+      <span class="label" id="lobbyCount">Jogadores</span>
+      <div class="players" id="lobbyPlayers"></div>
+    </div>
+    <div class="block">
+      <span class="label">Dificuldade</span>
+      <div class="opts" id="optNivel"></div>
+    </div>
+    <div class="row">
+      <div><b>Perguntas</b><div class="muted" style="font-size:13px">na partida</div></div>
+      <div class="stepper">
+        <button type="button" id="tMinus" aria-label="Menos perguntas">−</button>
+        <output id="tCount">10</output>
+        <button type="button" id="tPlus" aria-label="Mais perguntas">+</button>
+      </div>
+    </div>
+    <div class="block">
+      <span class="label">Tempo para chutar</span>
+      <div class="opts" id="optTempo"></div>
+    </div>
+    <div class="bottom">
+      <button class="btn go host-only" id="comecar" type="button">Começar partida</button>
+      <p class="wait-note guest-only" id="lobbyWait">Esperando o anfitrião começar…</p>
+    </div>
+  </section>
+
+  <!-- GUESS -->
+  <section class="screen" id="s-chute" hidden>
+    <div class="top"><span class="label">Chute em segredo</span><span class="secs" id="cSecs"></span></div>
+    <div class="timer" id="cTimer"><i></i></div>
+    <div class="qcard pop" id="cCard">
+      <div class="top"><span class="label" id="cCat">História</span><span class="lvl" id="cLvl"></span></div>
+      <div class="q" id="cText">Pergunta</div>
+    </div>
+    <div id="cInput" class="block">
+      <div class="display"><span class="n empty" id="cNum">0</span><span class="u" id="cUnit">ano</span></div>
+      <div class="pad" id="pad"></div>
+      <button class="btn go" id="enviar" type="button" disabled>Enviar chute</button>
+    </div>
+    <div id="cSent" class="sent" hidden>
+      <span class="label">Seu chute</span>
+      <div class="v" id="cSentVal">0</div>
+      <span class="muted" id="cSentUnit"></span>
+      <button class="link" id="mudar" type="button">Mudar chute</button>
+    </div>
+    <div class="block">
+      <span class="label" id="cStatus">Quem já chutou</span>
+      <div class="players" id="cPlayers"></div>
+    </div>
+    <div class="bottom host-only">
+      <button class="btn ghost small" id="cForce" type="button">Mostrar os chutes agora</button>
+    </div>
+  </section>
+
+  <!-- BET -->
+  <section class="screen" id="s-aposta" hidden>
+    <div class="top"><span class="label">Hora de apostar</span><span class="secs" id="aSecs"></span></div>
+    <div class="timer" id="aTimer"><i></i></div>
+    <div class="qcard mini"><div class="q" id="aText">Pergunta</div><span class="label" id="aUnit"></span></div>
+    <h2>Qual chute chegou mais perto?</h2>
+    <p class="muted">Toque numa carta. Vale apostar no seu. Acertou a aposta: +1.</p>
+    <div class="board" id="aBoard"></div>
+    <span class="label" id="aStatus">Quem já apostou</span>
+    <div class="players" id="aPlayers"></div>
+    <div class="react" data-react></div>
+    <div class="bottom host-only">
+      <button class="btn hot" id="aForce" type="button">Revelar resposta</button>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section class="screen" id="s-resultado" hidden>
+    <div class="answer pop" id="rCard">
+      <span class="label">Resposta certa</span>
+      <div class="q" id="rText"></div>
+      <div class="big" id="rAns">0</div>
+      <span class="u" id="rUnit"></span>
+      <span class="badge" id="rExact" hidden>Cravou!</span>
+    </div>
+    <div class="board" id="rBoard"></div>
+    <div class="block" id="rAwards"></div>
+    <div class="react" data-react></div>
+    <span class="label">Placar</span>
+    <div class="scores" id="rScores"></div>
+    <div class="bottom">
+      <button class="btn go host-only" id="proxima" type="button">Próxima pergunta</button>
+      <p class="wait-note guest-only" id="rWait">Esperando o anfitrião…</p>
+    </div>
+  </section>
+
+  <!-- END -->
+  <section class="screen" id="s-fim" hidden>
+    <div class="podium pop">
+      <div class="crown">🏆</div>
+      <span class="label">Quem chegou mais perto</span>
+      <div class="who" id="champ">Ana</div>
+      <p class="muted" id="champSub"></p>
+    </div>
+    <div class="block" id="fAwards"></div>
+    <div class="react" data-react></div>
+    <div class="scores" id="fScores"></div>
+    <div class="bottom">
+      <button class="btn go host-only" id="denovo" type="button">Jogar de novo</button>
+      <p class="wait-note guest-only">O anfitrião pode começar outra partida.</p>
+    </div>
+  </section>
+
+  <div class="foot" id="foot" hidden>
+    <button class="link" id="sair" type="button">Sair da sala</button>
+    <button class="link guest-only" id="virarHost" type="button">Virar anfitrião</button>
+  </div>
+</div>
+
+<div class="overlay" id="rulesSheet" hidden>
+  <div class="sheet">
+    <div class="top"><h2>Regras</h2><button class="btn ghost small auto" id="rulesClose" type="button">Fechar</button></div>
+    <div class="rules" id="rulesFull"></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script>
+/* [nível 1-3, categoria, pergunta, resposta, unidade] */
+const Q = [
+  [1,"Espaço","Em que ano o homem pisou na Lua pela primeira vez?",1969,"ano"],
+  [1,"História","Em que ano os portugueses chegaram ao Brasil?",1500,"ano"],
+  [1,"História","Em que ano foi a Independência do Brasil?",1822,"ano"],
+  [1,"Esporte","Quantas Copas do Mundo o Brasil já ganhou?",5,"Copas"],
+  [1,"Espaço","Quantos planetas tem o Sistema Solar?",8,"planetas"],
+  [1,"Bichos","Quantas patas tem uma aranha?",8,"patas"],
+  [1,"Bichos","Quantos corações tem um polvo?",3,"corações"],
+  [1,"Geografia","Quantos estados tem os Estados Unidos?",50,"estados"],
+  [1,"Geografia","Quantos estados tem o Brasil, sem contar o Distrito Federal?",26,"estados"],
+  [1,"Cotidiano","Quantas teclas tem um piano padrão?",88,"teclas"],
+  [1,"Cotidiano","Quantos minutos tem um dia?",1440,"minutos"],
+  [1,"Cotidiano","Quantos segundos tem uma hora?",3600,"segundos"],
+  [1,"Cotidiano","Quantas cartas tem um baralho, sem os curingas?",52,"cartas"],
+  [1,"Cotidiano","Quantas peças tem um dominó tradicional?",28,"peças"],
+  [1,"Cotidiano","Quantas casas tem um tabuleiro de xadrez?",64,"casas"],
+  [1,"Cotidiano","Quantos ml tem uma lata de refrigerante comum?",350,"ml"],
+  [1,"Esporte","Qual o comprimento de uma piscina olímpica?",50,"metros"],
+  [1,"Esporte","Quantos jogadores de cada time ficam em quadra no vôlei?",6,"jogadores"],
+  [1,"Cultura pop","Em que ano foi lançado o primeiro iPhone?",2007,"ano"],
+  [1,"Cultura pop","Em que ano saiu o primeiro filme do Harry Potter?",2001,"ano"],
+  [1,"Cultura pop","Em que ano o WhatsApp foi lançado?",2009,"ano"],
+  [1,"Cotidiano","Em que ano o Pix foi lançado?",2020,"ano"],
+  [1,"Corpo humano","Quantos dentes tem um adulto, contando os sisos?",32,"dentes"],
+
+  [2,"Corpo humano","Quantos ossos tem o corpo de um adulto?",206,"ossos"],
+  [2,"Corpo humano","Quantos litros de sangue tem um adulto, em média?",5,"litros"],
+  [2,"História","Em que ano caiu o Muro de Berlim?",1989,"ano"],
+  [2,"História","Em que ano o Titanic afundou?",1912,"ano"],
+  [2,"História","Em que ano Brasília foi inaugurada?",1960,"ano"],
+  [2,"História","Em que ano a escravidão foi abolida no Brasil?",1888,"ano"],
+  [2,"História","Em que ano foi proclamada a República no Brasil?",1889,"ano"],
+  [2,"História","Em que ano a cidade de São Paulo foi fundada?",1554,"ano"],
+  [2,"História","Quantos anos durou a ditadura militar no Brasil?",21,"anos"],
+  [2,"História","Quantos anos durou a Segunda Guerra Mundial?",6,"anos"],
+  [2,"História","Por quantos anos a Rainha Elizabeth II reinou?",70,"anos"],
+  [2,"Geografia","Quantos países são membros da ONU?",193,"países"],
+  [2,"Geografia","Quantos países fazem fronteira com o Brasil?",10,"países"],
+  [2,"Geografia","Qual a altura do Cristo Redentor, sem contar o pedestal?",30,"metros"],
+  [2,"Geografia","Quantas estrelas tem a bandeira do Brasil?",27,"estrelas"],
+  [2,"Geografia","Quantas línguas oficiais tem a Suíça?",4,"línguas"],
+  [2,"Política","Quantos senadores tem o Brasil?",81,"senadores"],
+  [2,"Esporte","Em que ano foi a primeira Copa do Mundo?",1930,"ano"],
+  [2,"Esporte","Em que ano o Brasil ganhou a sua primeira Copa?",1958,"ano"],
+  [2,"Esporte","Quantos gols teve no total o jogo Brasil x Alemanha da Copa de 2014?",8,"gols"],
+  [2,"Esporte","Quantos gols Ronaldo Fenômeno marcou em Copas do Mundo?",15,"gols"],
+  [2,"Esporte","Quantos títulos mundiais de Fórmula 1 Ayrton Senna ganhou?",3,"títulos"],
+  [2,"Esporte","Quantos anos Ayrton Senna tinha quando morreu?",34,"anos"],
+  [2,"Esporte","Quantas medalhas de ouro o Brasil ganhou nas Olimpíadas de Tóquio?",7,"medalhas de ouro"],
+  [2,"Cultura pop","Quantos episódios tem a série Friends?",236,"episódios"],
+  [2,"Cultura pop","Quantos anos Michael Jackson tinha quando morreu?",50,"anos"],
+  [2,"Cultura pop","Em que ano o Google foi fundado?",1998,"ano"],
+  [2,"Cultura pop","Em que ano o Facebook foi criado?",2004,"ano"],
+  [2,"Cultura pop","Em que ano o YouTube foi lançado?",2005,"ano"],
+  [2,"Cultura pop","Em que ano foi o primeiro Rock in Rio?",1985,"ano"],
+  [2,"Cultura pop","Em que ano foi lançado o primeiro Super Mario Bros?",1985,"ano"],
+  [2,"Cultura pop","Em que ano a Apple foi fundada?",1976,"ano"],
+  [2,"Cultura pop","Em que ano o primeiro PlayStation foi lançado no Japão?",1994,"ano"],
+  [2,"Ciência","Quantos elementos tem a tabela periódica?",118,"elementos"],
+  [2,"Ciência","Quantas calorias tem 1 grama de gordura?",9,"calorias"],
+
+  [3,"Espaço","Qual a distância média da Terra até a Lua?",384400,"km"],
+  [3,"Ciência","Qual a velocidade da luz?",299792,"km por segundo"],
+  [3,"Ciência","Qual a velocidade do som no ar, aproximadamente?",1235,"km/h"],
+  [3,"Espaço","Qual a temperatura na superfície do Sol, aproximadamente?",5500,"°C"],
+  [3,"Espaço","Quantos km tem o diâmetro da Terra na linha do Equador?",12756,"km"],
+  [3,"Espaço","Qual a idade da Terra?",4540,"milhões de anos"],
+  [3,"Espaço","Quantas Terras caberiam dentro do Sol, aproximadamente?",1300000,"Terras"],
+  [3,"Espaço","Quantos km a Terra percorre em volta do Sol em um ano?",940,"milhões de km"],
+  [3,"Geografia","Qual a altura do Monte Everest?",8849,"metros"],
+  [3,"Geografia","Qual a profundidade da Fossa das Marianas, o ponto mais fundo do oceano?",10994,"metros"],
+  [3,"Geografia","Qual a altura do Burj Khalifa, o prédio mais alto do mundo?",828,"metros"],
+  [3,"Geografia","Qual a altura da Torre Eiffel hoje, com as antenas?",330,"metros"],
+  [3,"Geografia","Quantos km tem a Muralha da China, somando todos os trechos?",21196,"km"],
+  [3,"Geografia","Qual a população do Brasil no Censo de 2022?",203,"milhões de pessoas"],
+  [3,"Geografia","Quantos habitantes tem a cidade de São Paulo no Censo de 2022?",11451,"mil pessoas"],
+  [3,"Geografia","Qual a extensão da Ponte Rio-Niterói, arredondando?",13,"km"],
+  [3,"Política","Quantos deputados federais tem o Brasil?",513,"deputados"],
+  [3,"História","Em que ano o Coliseu de Roma foi inaugurado?",80,"ano (depois de Cristo)"],
+  [3,"História","Em que ano Santos Dumont voou com o 14-Bis em Paris?",1906,"ano"],
+  [3,"História","Em que ano o Cristo Redentor foi inaugurado?",1931,"ano"],
+  [3,"História","Com quantos anos Dom Pedro II assumiu o trono do Brasil?",14,"anos"],
+  [3,"História","Por quantos anos Dom Pedro II governou o Brasil?",49,"anos"],
+  [3,"História","Em que ano a Petrobras foi fundada?",1953,"ano"],
+  [3,"História","Em que ano a Coca-Cola foi inventada?",1886,"ano"],
+  [3,"História","Quantos anos Mozart tinha quando morreu?",35,"anos"],
+  [3,"Esporte","Quantos metros tem uma maratona?",42195,"metros"],
+  [3,"Esporte","Qual a capacidade atual do Maracanã, aproximadamente?",78838,"pessoas"],
+  [3,"Esporte","Quantos gols Pelé marcou em Copas do Mundo?",12,"gols"],
+  [3,"Esporte","Quantos litros de água cabem numa piscina olímpica?",2500000,"litros"],
+  [3,"Corpo humano","Quantos ossos tem cada pé humano?",26,"ossos"],
+  [3,"Cotidiano","Quantos litros de água são gastos para produzir 1 kg de carne bovina, em média?",15400,"litros"]
+];
+const NIVEIS = [
+  ["escalada","📈 Escalada","começa fácil, termina difícil"],
+  ["facil","🟢 Fácil","pra aquecer"],
+  ["medio","🟡 Médio","tem que pensar"],
+  ["dificil","🔴 Difícil","ninguém sabe, todo mundo chuta"]
+];
+const TEMPOS = [[30,"30 s"],[60,"60 s"],[90,"90 s"],[0,"Sem tempo"]];
+const APOSTA_S = 30;
+const COLORS = ["#ffd23f","#3ee6c1","#ff4d6d","#8ab4ff","#ff9f43","#c38bff","#7bed9f","#ff7eb6","#70d6ff","#e0c3a0","#b5f04a","#ffb3a7"];
+const EMOJIS = ["😂","🤯","🫣","🔥","🎯"];
+
+const RULES_HTML = `
+  <span class="label">Como joga</span>
+  <ol>
+    <li>Uma pergunta aparece no celular de todo mundo. A resposta é sempre um <b>número</b>.</li>
+    <li>Cada um digita o seu chute em segredo, antes do tempo acabar.</li>
+    <li>Os chutes aparecem para todos, em ordem. Cada um <b>aposta</b> no chute que acha que chegou mais perto. Pode ser o seu.</li>
+    <li>A resposta é revelada e os pontos entram no placar. Empate vale para todos.</li>
+  </ol>
+  <span class="label">Pontos</span>
+  <div class="pts">
+    <b>+4</b><span>cravou: chutou o número exato</span>
+    <b>+2</b><span>chute mais perto da resposta</span>
+    <b>+1</b><span>apostou no chute que chegou mais perto</span>
+  </div>
+  <p class="muted">Quem cravou ganha 4 no lugar dos 2. Quem tiver mais pontos no fim da partida vence.</p>`;
+
+const $ = id => document.getElementById(id);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmt = n => Number(n).toLocaleString("pt-BR");
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k) { try { localStorage.removeItem(k); } catch {} }
+};
+function rand(n) {
+  try {
+    const buf = new Uint32Array(1), lim = Math.floor(0x100000000 / n) * n;
+    do crypto.getRandomValues(buf); while (buf[0] >= lim);
+    return buf[0] % n;
+  } catch { return Math.floor(Math.random() * n); }
+}
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = rand(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function uuid() {
+  if (crypto.randomUUID) return crypto.randomUUID();
+  const b = crypto.getRandomValues(new Uint8Array(16)); b[6] = (b[6] & 15) | 64; b[8] = (b[8] & 63) | 128;
+  const h = [...b].map(x => x.toString(16).padStart(2, "0")).join("");
+  return `${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}`;
+}
+let toastT;
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => t.hidden = true, 2600); }
+
+/* ---------- state ---------- */
+const CFG = window.MOSCA_CFG || {};
+const sb = CFG.url && window.supabase ? window.supabase.createClient(CFG.url, CFG.key) : null;
+let me = store.get("mosca_me", null);
+if (!me || !me.id) { me = { id: uuid(), nome: "" }; store.set("mosca_me", me); }
+const S = { code: null, sala: null, jogadores: [], palpites: [], ch: null };
+let entry = "", editing = false, lastRodada = null, revealed = null, confettiDone = null;
+
+const isHost = () => S.sala && S.sala.host === me.id;
+const ativos = () => S.jogadores.filter(j => j.ativo !== false);
+const nomeDe = id => (S.jogadores.find(j => j.id === id) || {}).nome || "Alguém";
+const corDe = id => { const i = S.jogadores.findIndex(j => j.id === id); return COLORS[(i < 0 ? 0 : i) % COLORS.length]; };
+const av = id => `<span class="av" style="background:${corDe(id)}">${esc(nomeDe(id).trim().charAt(0).toUpperCase() || "?")}</span>`;
+const pergunta = () => Q[S.sala.perguntas[S.sala.n - 1]];
+const doRound = r => S.palpites.filter(p => p.rodada === r);
+
+/* ---------- scoring: +4 cravou, +2 mais perto, +1 aposta certa ---------- */
+function pontuar(n) {
+  const e = S.sala, rod = e.base + n, q = Q[e.perguntas[n - 1]], ans = q[3];
+  const ps = doRound(rod);
+  const guesses = ps.filter(p => p.chute != null).map(p => ({ id: p.jogador, v: Number(p.chute) }));
+  const vals = [...new Set(guesses.map(g => g.v))].sort((a, b) => a - b);
+  const r = { ans, q, vals, guesses, ps, win: [], exact: false, gains: {}, why: {}, far: null };
+  if (!vals.length) return r;
+  const best = Math.min(...vals.map(v => Math.abs(v - ans)));
+  r.win = vals.filter(v => Math.abs(v - ans) === best);
+  r.exact = best === 0;
+  const add = (id, k, t) => { r.gains[id] = (r.gains[id] || 0) + k; (r.why[id] = r.why[id] || []).push(t); };
+  for (const g of guesses) if (r.win.includes(g.v)) add(g.id, r.exact ? 4 : 2, r.exact ? "cravou" : "mais perto");
+  for (const p of ps) if (p.aposta != null && r.win.includes(Number(p.aposta))) add(p.jogador, 1, "aposta certa");
+  if (vals.length > 1) for (const g of guesses) { const d = Math.abs(g.v - ans); if (!r.far || d > r.far.d) r.far = { id: g.id, d }; }
+  return r;
+}
+function placar() {
+  const e = S.sala, tot = {};
+  for (const j of S.jogadores) tot[j.id] = 0;
+  if (!e || !e.perguntas || !e.n) return tot;
+  const last = e.fase === "resultado" || e.fase === "fim" ? e.n : e.n - 1;
+  for (let k = 1; k <= last; k++) { const r = pontuar(k); for (const id in r.gains) tot[id] = (tot[id] || 0) + r.gains[id]; }
+  return tot;
+}
+
+/* ---------- questions ---------- */
+function montarDeck(nivel, total, vistas) {
+  const doNivel = l => {
+    const all = shuffle(Q.map((_, i) => i).filter(i => Q[i][0] === l));
+    return [...all.filter(i => !vistas.includes(i)), ...all.filter(i => vistas.includes(i))];
+  };
+  let plano;
+  if (nivel === "escalada") { const a = Math.round(total / 3), b = Math.round(total / 3); plano = [[1, a], [2, b], [3, total - a - b]]; }
+  else plano = [[{ facil: 1, medio: 2, dificil: 3 }[nivel] || 2, total]];
+  const out = [];
+  for (const [l, k] of plano) out.push(...doNivel(l).filter(i => !out.includes(i)).slice(0, k));
+  if (out.length < total) out.push(...shuffle(Q.map((_, i) => i).filter(i => !out.includes(i))).slice(0, total - out.length));
+  return out;
+}
+
+/* ---------- network ---------- */
+function setNet(ok) { $("hdrNet").hidden = ok; }
+let refT, refreshing = false, again = false;
+function queueRefresh(ms = 120) { clearTimeout(refT); refT = setTimeout(refresh, ms); }
+async function refresh() {
+  if (!S.code || !sb) return;
+  if (refreshing) { again = true; return; }
+  refreshing = true;
+  try {
+    const code = S.code;
+    const [a, b, c] = await Promise.all([
+      sb.from("mosca_salas").select("estado").eq("codigo", code).maybeSingle(),
+      sb.from("mosca_jogadores").select("id,nome,ativo,entrou_em").eq("sala", code).order("entrou_em"),
+      sb.from("mosca_palpites").select("rodada,jogador,chute,aposta").eq("sala", code)
+    ]);
+    if (code !== S.code) return;
+    if (a.error || b.error || c.error) { setNet(false); return; }
+    setNet(true);
+    if (!a.data) { sairDaSala("Essa sala não existe mais."); return; }
+    if (pendentes) { again = true; return; }
+    S.sala = a.data.estado; S.jogadores = b.data; S.palpites = c.data.map(p => ({ ...p, chute: p.chute == null ? null : Number(p.chute), aposta: p.aposta == null ? null : Number(p.aposta) }));
+    const eu = S.jogadores.find(j => j.id === me.id);
+    if (!eu) await registrar(code);
+    else if (eu.ativo === false) { sairDaSala("Você foi tirado da sala. Digite o código para voltar."); return; }
+    render();
+    hostTick();
+  } catch { setNet(false); }
+  finally { refreshing = false; if (again) { again = false; queueRefresh(); } }
+}
+async function registrar(code) {
+  await sb.from("mosca_jogadores").upsert({ sala: code, id: me.id, nome: me.nome, ativo: true }, { onConflict: "sala,id" });
+}
+/* Writes go out one at a time, each built on the latest local state, so quick taps never undo each other.
+   Settings apply locally right away; phase changes wait for the server to accept them. */
+let writeQ = Promise.resolve(), pendentes = 0;
+function setEstado(patch, expect) {
+  if (!expect) { S.sala = { ...S.sala, ...patch }; render(); }
+  pendentes++;
+  const job = writeQ.then(async () => {
+    const novo = expect ? { ...S.sala, ...patch } : S.sala;
+    let q = sb.from("mosca_salas").update({ estado: novo, atualizado_em: new Date().toISOString() }).eq("codigo", S.code);
+    if (expect) q = q.eq("estado->>fase", expect.fase).eq("estado->>n", String(expect.n));
+    const { data, error } = await q.select("estado");
+    if (error) { toast("Não deu para salvar. Confira a internet."); return false; }
+    if (expect && data && data.length) { S.sala = data[0].estado; render(); }
+    return !!(data && data.length);
+  }).catch(() => false).finally(() => { pendentes--; queueRefresh(300); });
+  writeQ = job;
+  return job;
+}
+function assinar(code) {
+  if (S.ch) sb.removeChannel(S.ch);
+  S.ch = sb.channel("mosca-" + code, { config: { broadcast: { self: false } } })
+    .on("postgres_changes", { event: "*", schema: "public", table: "mosca_salas", filter: `codigo=eq.${code}` }, () => queueRefresh())
+    .on("postgres_changes", { event: "*", schema: "public", table: "mosca_jogadores", filter: `sala=eq.${code}` }, () => queueRefresh())
+    .on("postgres_changes", { event: "*", schema: "public", table: "mosca_palpites", filter: `sala=eq.${code}` }, () => queueRefresh())
+    .on("broadcast", { event: "reacao" }, ({ payload }) => { if (payload && EMOJIS.includes(payload.e)) floatEmoji(payload.e); })
+    .subscribe();
+}
+setInterval(() => { if (S.code && document.visibilityState === "visible") queueRefresh(0); }, 3500);
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") queueRefresh(0); });
+
+/* ---------- home ---------- */
+function codigoNovo() { const L = "ABCDEFGHJKLMNPQRSTUVWXYZ"; return Array.from({ length: 4 }, () => L[rand(L.length)]).join(""); }
+function lerNome() {
+  const n = $("nome").value.trim();
+  if (!n) { $("homeErr").textContent = "Escreva seu nome antes."; $("homeErr").hidden = false; $("nome").focus(); return null; }
+  me.nome = n.slice(0, 16); store.set("mosca_me", me); $("homeErr").hidden = true;
+  return me.nome;
+}
+function erroHome(msg) { $("homeErr").textContent = msg; $("homeErr").hidden = false; }
+$("criar").onclick = async () => {
+  if (!sb) return erroHome("O jogo está sem conexão com o servidor.");
+  if (!lerNome()) return;
+  $("criar").disabled = true;
+  try {
+    for (let i = 0; i < 6; i++) {
+      const code = codigoNovo();
+      const { error } = await sb.from("mosca_salas").insert({ codigo: code, estado: { host: me.id, fase: "lobby", n: 0, base: 0, rodada: 0, total: 10, nivel: "escalada", tempo: 60, vistas: [] } });
+      if (!error) return await entrarNa(code);
+    }
+    erroHome("Não consegui criar a sala. Tente de novo.");
+  } finally { $("criar").disabled = false; }
+};
+$("entrar").onclick = async () => {
+  if (!sb) return erroHome("O jogo está sem conexão com o servidor.");
+  if (!lerNome()) return;
+  const code = $("codigo").value.trim().toUpperCase();
+  if (!/^[A-Z]{4}$/.test(code)) return erroHome("O código tem 4 letras.");
+  $("entrar").disabled = true;
+  try {
+    const { data } = await sb.from("mosca_salas").select("codigo").eq("codigo", code).maybeSingle();
+    if (!data) return erroHome("Não achei a sala " + code + ". Confira o código.");
+    await entrarNa(code);
+  } finally { $("entrar").disabled = false; }
+};
+$("codigo").addEventListener("input", e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z]/g, ""); });
+async function entrarNa(code) {
+  await registrar(code);
+  S.code = code; store.set("mosca_sala", code);
+  history.replaceState(null, "", "?sala=" + code);
+  assinar(code);
+  await refresh();
+}
+async function sairDaSala(msg) {
+  const code = S.code;
+  if (S.ch) sb.removeChannel(S.ch);
+  S.ch = null; S.code = null; S.sala = null; S.jogadores = []; S.palpites = [];
+  store.del("mosca_sala");
+  history.replaceState(null, "", location.pathname);
+  if (code && !msg) sb.from("mosca_jogadores").update({ ativo: false }).eq("sala", code).eq("id", me.id).then(() => {});
+  render();
+  if (msg) erroHome(msg);
+}
+$("sair").onclick = () => sairDaSala();
+$("virarHost").onclick = () => setEstado({ host: me.id }).then(ok => ok && toast("Agora você controla a partida."));
+
+/* ---------- render ---------- */
+let telaAtual = null;
+function show(id) {
+  if (telaAtual !== id) { for (const s of $$(".screen")) s.hidden = s.id !== id; telaAtual = id; window.scrollTo(0, 0); }
+}
+function render() {
+  const inRoom = !!(S.code && S.sala);
+  $("hdr").hidden = !inRoom; $("foot").hidden = !inRoom;
+  if (!inRoom) { show("s-home"); return; }
+  const e = S.sala, host = isHost();
+  $$(".host-only").forEach(el => el.hidden = !host);
+  $$(".guest-only").forEach(el => el.hidden = host);
+  $("hdrCode").textContent = S.code;
+  $("hdrRound").textContent = e.fase === "lobby" ? "Sala de espera" : e.fase === "fim" ? "Fim de jogo" : `Pergunta ${e.n} de ${e.total}`;
+  if (e.rodada !== lastRodada) { lastRodada = e.rodada; entry = ""; editing = false; }
+  ({ lobby: renderLobby, chute: renderChute, aposta: renderAposta, resultado: renderResultado, fim: renderFim }[e.fase] || renderLobby)();
+}
+
+function playerChips(el, doneFn) {
+  el.innerHTML = ativos().map(j =>
+    `<span class="player ${doneFn ? (doneFn(j.id) ? "done" : "wait") : ""}">${av(j.id)}<span class="nm">${esc(j.nome)}${j.id === me.id ? " (você)" : ""}${j.id === S.sala.host ? " 👑" : ""}</span>${
+      !doneFn && isHost() && j.id !== me.id ? `<button class="x" data-kick="${esc(j.id)}" aria-label="Tirar ${esc(j.nome)} da sala">×</button>` : ""}</span>`).join("");
+  el.querySelectorAll("[data-kick]").forEach(b => b.onclick = () =>
+    sb.from("mosca_jogadores").update({ ativo: false }).eq("sala", S.code).eq("id", b.dataset.kick).then(() => queueRefresh(0)));
+}
+
+function renderLobby() {
+  const e = S.sala, host = isHost();
+  show("s-lobby");
+  $("lobbyCode").textContent = S.code;
+  $("lobbyCount").textContent = `Jogadores (${ativos().length})`;
+  playerChips($("lobbyPlayers"));
+  $("optNivel").innerHTML = NIVEIS.map(([k, t, d]) => `<button type="button" class="chip-opt" data-nivel="${k}" aria-pressed="${e.nivel === k}" ${host ? "" : "disabled"}>${t}<small>${d}</small></button>`).join("");
+  $("optNivel").querySelectorAll("button").forEach(b => b.onclick = () => setEstado({ nivel: b.dataset.nivel }));
+  $("optTempo").innerHTML = TEMPOS.map(([s, t]) => `<button type="button" class="chip-opt" data-tempo="${s}" aria-pressed="${(e.tempo || 0) === s}" ${host ? "" : "disabled"}>${t}</button>`).join("");
+  $("optTempo").querySelectorAll("button").forEach(b => b.onclick = () => setEstado({ tempo: Number(b.dataset.tempo) }));
+  $("tCount").textContent = e.total || 10;
+  $("tMinus").disabled = !host || (e.total || 10) <= 5;
+  $("tPlus").disabled = !host || (e.total || 10) >= 15;
+  $("comecar").disabled = ativos().length < 2;
+  $("comecar").textContent = ativos().length < 2 ? "Precisa de pelo menos 2 jogadores" : "Começar partida";
+  $("lobbyWait").textContent = `Esperando ${nomeDe(e.host)} começar…`;
+}
+$("tMinus").onclick = () => setEstado({ total: Math.max(5, (S.sala.total || 10) - 1) });
+$("tPlus").onclick = () => setEstado({ total: Math.min(15, (S.sala.total || 10) + 1) });
+$("comecar").onclick = comecar;
+async function comecar() {
+  const e = S.sala;
+  const base = Math.max(e.rodada || 0, ...S.palpites.map(p => p.rodada), 0);
+  const perguntas = montarDeck(e.nivel || "escalada", e.total || 10, e.vistas || []);
+  const vistas = [...(e.vistas || []), ...perguntas].slice(-120);
+  await setEstado({ fase: "chute", base, n: 1, rodada: base + 1, perguntas, vistas, prazo: e.tempo ? Date.now() + e.tempo * 1000 : null }, { fase: e.fase, n: e.n || 0 });
+}
+$("share").onclick = async () => {
+  const url = location.origin + location.pathname + "?sala=" + S.code;
+  const text = `Bora jogar Na Mosca! Sala ${S.code}`;
+  try { if (navigator.share) { await navigator.share({ title: "Na Mosca", text, url }); return; } } catch (err) { if (err && err.name === "AbortError") return; }
+  try { await navigator.clipboard.writeText(`${text}: ${url}`); toast("Link copiado. Manda no grupo!"); }
+  catch { toast(url); }
+};
+
+function lvlDots(l) { return [1, 2, 3].map(i => `<i class="${i <= l ? "on" : ""}"></i>`).join("") + `<span class="label" style="margin-left:4px">${["", "Fácil", "Médio", "Difícil"][l]}</span>`; }
+
+function renderChute() {
+  const e = S.sala, q = pergunta();
+  const telaNova = telaAtual !== "s-chute";
+  show("s-chute");
+  if (telaNova) { const c = $("cCard"); c.classList.remove("pop"); void c.offsetWidth; c.classList.add("pop"); }
+  $("cCat").textContent = q[1]; $("cLvl").innerHTML = lvlDots(q[0]); $("cText").textContent = q[2];
+  $("cUnit").textContent = q[4];
+  const mine = doRound(e.rodada).find(p => p.jogador === me.id && p.chute != null);
+  const showInput = !mine || editing;
+  $("cInput").hidden = !showInput; $("cSent").hidden = showInput;
+  if (mine) { $("cSentVal").textContent = fmt(mine.chute); $("cSentUnit").textContent = q[4]; }
+  renderEntry();
+  const feitos = id => doRound(e.rodada).some(p => p.jogador === id && p.chute != null);
+  const n = ativos().filter(j => feitos(j.id)).length;
+  $("cStatus").textContent = `${n} de ${ativos().length} já chutaram`;
+  playerChips($("cPlayers"), feitos);
+}
+function renderEntry() {
+  $("cNum").textContent = entry ? fmt(entry) : "0";
+  $("cNum").classList.toggle("empty", !entry);
+  $("enviar").disabled = !entry;
+}
+(function buildPad() {
+  for (const k of ["1","2","3","4","5","6","7","8","9","000","0","⌫"]) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "key" + (k === "⌫" || k === "000" ? " fn" : ""); b.textContent = k;
+    if (k === "⌫") b.setAttribute("aria-label", "Apagar");
+    b.onclick = () => {
+      if (k === "⌫") entry = entry.slice(0, -1);
+      else { const nxt = (entry === "0" ? "" : entry) + k; if (nxt.length <= 12 && !(nxt === "000")) entry = nxt.replace(/^0+(?=\d)/, ""); }
+      renderEntry();
+    };
+    $("pad").appendChild(b);
+  }
+})();
+$("enviar").onclick = async () => {
+  if (!entry || S.sala.fase !== "chute") return;
+  const v = Number(entry);
+  $("enviar").disabled = true;
+  const { error } = await sb.from("mosca_palpites").upsert({ sala: S.code, rodada: S.sala.rodada, jogador: me.id, chute: v, atualizado_em: new Date().toISOString() }, { onConflict: "sala,rodada,jogador" });
+  if (error) { toast("Não foi. Tente de novo."); $("enviar").disabled = false; return; }
+  const p = doRound(S.sala.rodada).find(p => p.jogador === me.id);
+  if (p) p.chute = v; else S.palpites.push({ rodada: S.sala.rodada, jogador: me.id, chute: v, aposta: null });
+  editing = false; entry = "";
+  if (navigator.vibrate) navigator.vibrate(25);
+  render(); queueRefresh(0);
+};
+$("mudar").onclick = () => { editing = true; render(); };
+$("cForce").onclick = () => avancar();
+
+function renderAposta() {
+  const e = S.sala, q = pergunta();
+  show("s-aposta");
+  $("aText").textContent = q[2]; $("aUnit").textContent = "Resposta em: " + q[4];
+  const ps = doRound(e.rodada);
+  const minha = (ps.find(p => p.jogador === me.id) || {}).aposta;
+  drawBoard($("aBoard"), { pick: true, minha });
+  const feitos = id => ps.some(p => p.jogador === id && p.aposta != null);
+  $("aStatus").textContent = `${ativos().filter(j => feitos(j.id)).length} de ${ativos().length} já apostaram`;
+  playerChips($("aPlayers"), feitos);
+}
+function drawBoard(el, { pick, minha, res } = {}) {
+  const e = S.sala, ps = doRound(e.rodada);
+  const vals = [...new Set(ps.filter(p => p.chute != null).map(p => p.chute))].sort((a, b) => a - b);
+  if (!vals.length) { el.innerHTML = `<p class="muted">Ninguém chutou nessa rodada.</p>`; return; }
+  el.innerHTML = vals.map(v => {
+    const by = ps.filter(p => p.chute === v).map(p => p.jogador);
+    const bets = ps.filter(p => p.aposta === v).map(p => p.jogador);
+    const cls = ["gcard"]; let tag = "";
+    if (res) { if (res.win.includes(v)) { cls.push("win"); tag = res.exact ? "🎯 cravou" : "mais perto"; } else cls.push("lose"); }
+    else if (minha === v) { cls.push("picked"); tag = "sua aposta"; }
+    return `<button type="button" class="${cls.join(" ")}" data-v="${v}" ${pick ? "" : "disabled"}>${tag ? `<span class="tag">${tag}</span>` : ""}<span class="val">${fmt(v)}</span><span class="by">${by.map(id => esc(nomeDe(id))).join(", ")}</span><span class="bets">${bets.map(av).join("")}</span></button>`;
+  }).join("");
+  if (pick) el.querySelectorAll(".gcard").forEach(b => b.onclick = () => apostar(Number(b.dataset.v)));
+}
+async function apostar(v) {
+  if (S.sala.fase !== "aposta") return;
+  const rod = S.sala.rodada;
+  const p = doRound(rod).find(p => p.jogador === me.id);
+  if (p) p.aposta = v; else S.palpites.push({ rodada: rod, jogador: me.id, chute: null, aposta: v });
+  render();
+  if (navigator.vibrate) navigator.vibrate(20);
+  const { error } = await sb.from("mosca_palpites").upsert({ sala: S.code, rodada: rod, jogador: me.id, aposta: v, atualizado_em: new Date().toISOString() }, { onConflict: "sala,rodada,jogador" });
+  if (error) toast("A aposta não foi. Tente de novo.");
+  queueRefresh(0);
+}
+$("aForce").onclick = () => avancar();
+
+function scoreRows(el, gains) {
+  const tot = placar();
+  const rank = ativos().map(j => j.id).sort((a, b) => tot[b] - tot[a]);
+  el.innerHTML = rank.map(id => {
+    const pos = rank.findIndex(o => tot[o] === tot[id]) + 1;
+    const g = gains && gains[id] ? `+${gains[id]}` : "";
+    return `<div class="score ${pos === 1 && tot[id] > 0 ? "first" : ""} ${id === me.id ? "me" : ""}"><span class="pos">${pos}º</span><span class="nm">${av(id)}<span>${esc(nomeDe(id))}</span></span><span class="gain">${g}</span><span class="tot">${tot[id] || 0}</span></div>`;
+  }).join("");
+  return { tot, rank };
+}
+function renderResultado() {
+  const e = S.sala, r = pontuar(e.n);
+  show("s-resultado");
+  $("rText").textContent = r.q[2]; $("rUnit").textContent = r.q[4];
+  $("rExact").hidden = !r.exact;
+  if (revealed !== e.rodada) {
+    revealed = e.rodada;
+    const c = $("rCard"); c.classList.remove("pop"); void c.offsetWidth; c.classList.add("pop");
+    countUp($("rAns"), r.ans);
+    if (r.exact && confettiDone !== e.rodada) { confettiDone = e.rodada; confetti(); }
+    if (navigator.vibrate) navigator.vibrate(r.exact ? [60, 40, 60, 40, 120] : [40, 40, 40]);
+  }
+  drawBoard($("rBoard"), { res: r });
+  const aw = [];
+  const ganhadores = Object.keys(r.gains);
+  if (r.exact) aw.push(["🎯", "Cravou!", r.guesses.filter(g => r.win.includes(g.v)).map(g => nomeDe(g.id)).join(", ") + " acertou o número exato e levou +4"]);
+  else if (r.win.length) aw.push(["🥇", "Mais perto: +2", r.guesses.filter(g => r.win.includes(g.v)).map(g => nomeDe(g.id)).join(", ") + ` errou por ${fmt(Math.abs(r.win[0] - r.ans))}`]);
+  const apostadores = r.ps.filter(p => p.aposta != null && r.win.includes(p.aposta)).map(p => nomeDe(p.jogador));
+  if (apostadores.length) aw.push(["🤝", "Apostou certo: +1", apostadores.join(", ")]);
+  if (r.far && !r.win.includes(r.guesses.find(g => g.id === r.far.id).v)) aw.push(["🚀", "Chute mais viajado", `${nomeDe(r.far.id)} errou por ${fmt(r.far.d)}`]);
+  if (!ganhadores.length) aw.push(["🤷", "Ninguém pontuou", "Rodada perdida para todo mundo"]);
+  $("rAwards").innerHTML = aw.map(([em, t, s]) => `<div class="award"><span class="e">${em}</span><div><b>${esc(t)}</b><span>${esc(s)}</span></div></div>`).join("");
+  scoreRows($("rScores"), r.gains);
+  $("proxima").textContent = e.n >= e.total ? "Ver o campeão" : "Próxima pergunta";
+  $("rWait").textContent = `Esperando ${nomeDe(e.host)} passar para a próxima…`;
+}
+$("proxima").onclick = () => avancar();
+
+function renderFim() {
+  show("s-fim");
+  const { tot, rank } = scoreRows($("fScores"));
+  const top = rank.length ? tot[rank[0]] : 0;
+  const champs = rank.filter(id => tot[id] === top);
+  $("champ").textContent = champs.map(nomeDe).join(" e ");
+  $("champSub").textContent = champs.length > 1 ? `empataram com ${top} pontos` : `venceu com ${top} pontos`;
+  const e = S.sala, crav = {}, viaj = {};
+  for (let k = 1; k <= e.n; k++) {
+    const r = pontuar(k);
+    if (r.exact) for (const g of r.guesses) if (r.win.includes(g.v)) crav[g.id] = (crav[g.id] || 0) + 1;
+    if (r.far) viaj[r.far.id] = (viaj[r.far.id] || 0) + 1;
+  }
+  const best = o => { const ks = Object.keys(o); if (!ks.length) return null; const m = Math.max(...ks.map(k => o[k])); return [ks.filter(k => o[k] === m), m]; };
+  const aw = [], c = best(crav), v = best(viaj);
+  if (c) aw.push(["🎯", "Rei da cravada", `${c[0].map(nomeDe).join(", ")} cravou ${c[1]}x`]);
+  if (v) aw.push(["🚀", "Viajante oficial", `${v[0].map(nomeDe).join(", ")} deu o chute mais longe ${v[1]}x`]);
+  $("fAwards").innerHTML = aw.map(([em, t, s]) => `<div class="award"><span class="e">${em}</span><div><b>${esc(t)}</b><span>${esc(s)}</span></div></div>`).join("");
+  if (confettiDone !== "fim-" + e.rodada) { confettiDone = "fim-" + e.rodada; confetti(); }
+}
+$("denovo").onclick = () => setEstado({ fase: "lobby", n: 0, prazo: null }, { fase: "fim", n: S.sala.n });
+
+/* ---------- host drives the phases ---------- */
+let advancing = false;
+async function avancar() {
+  if (advancing || !isHost()) return;
+  advancing = true;
+  try {
+    const e = S.sala, exp = { fase: e.fase, n: e.n };
+    if (e.fase === "chute") {
+      const tem = doRound(e.rodada).some(p => p.chute != null);
+      await setEstado(tem ? { fase: "aposta", prazo: e.tempo ? Date.now() + APOSTA_S * 1000 : null } : { fase: "resultado", prazo: null }, exp);
+    } else if (e.fase === "aposta") await setEstado({ fase: "resultado", prazo: null }, exp);
+    else if (e.fase === "resultado") {
+      if (e.n >= e.total) await setEstado({ fase: "fim", prazo: null }, exp);
+      else await setEstado({ fase: "chute", n: e.n + 1, rodada: e.base + e.n + 1, prazo: e.tempo ? Date.now() + e.tempo * 1000 : null }, exp);
+    }
+  } finally { advancing = false; }
+}
+function hostTick() {
+  const e = S.sala;
+  if (!e || !isHost() || advancing) return;
+  const ps = doRound(e.rodada), at = ativos();
+  const late = e.prazo && Date.now() > e.prazo + 400;
+  if (e.fase === "chute" && (late || (at.length && at.every(j => ps.some(p => p.jogador === j.id && p.chute != null))))) avancar();
+  else if (e.fase === "aposta" && (late || (at.length && at.every(j => ps.some(p => p.jogador === j.id && p.aposta != null))))) avancar();
+}
+
+/* ---------- timer ---------- */
+setInterval(() => {
+  const e = S.sala;
+  if (!e || (e.fase !== "chute" && e.fase !== "aposta")) return;
+  const pre = e.fase === "chute" ? "c" : "a", bar = $(pre + "Timer"), secs = $(pre + "Secs");
+  if (!e.prazo) { bar.hidden = true; secs.textContent = ""; return; }
+  bar.hidden = false;
+  const dur = (e.fase === "chute" ? e.tempo : APOSTA_S) * 1000;
+  const left = Math.max(0, e.prazo - Date.now());
+  const low = left < 10000;
+  bar.firstElementChild.style.width = Math.min(100, left / dur * 100) + "%";
+  bar.classList.toggle("low", low); secs.classList.toggle("low", low);
+  secs.textContent = Math.ceil(left / 1000) + " s";
+  if (left === 0) hostTick();
+}, 250);
+
+/* ---------- fun ---------- */
+function countUp(el, to) {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { el.textContent = fmt(to); return; }
+  const t0 = performance.now(), dur = 1300;
+  const step = t => { const k = Math.min(1, (t - t0) / dur), ease = 1 - Math.pow(1 - k, 3); el.textContent = fmt(Math.round(to * ease)); if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+function confetti() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const cv = $("confetti"), ctx = cv.getContext("2d"), W = cv.width = innerWidth, H = cv.height = innerHeight;
+  cv.hidden = false;
+  const ps = Array.from({ length: 140 }, () => ({ x: W / 2 + (Math.random() - .5) * W * .4, y: H * .35, vx: (Math.random() - .5) * 12, vy: -Math.random() * 14 - 4, s: 5 + Math.random() * 6, r: Math.random() * 6, c: COLORS[rand(COLORS.length)] }));
+  const t0 = performance.now();
+  (function frame(t) {
+    ctx.clearRect(0, 0, W, H);
+    for (const p of ps) { p.vy += .35; p.x += p.vx; p.y += p.vy; p.r += .2; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2); ctx.restore(); }
+    if (t - t0 < 2600) requestAnimationFrame(frame); else { ctx.clearRect(0, 0, W, H); cv.hidden = true; }
+  })(t0);
+}
+function floatEmoji(e) {
+  const d = document.createElement("div");
+  d.className = "floaty"; d.textContent = e;
+  d.style.left = (10 + Math.random() * 75) + "%";
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 2300);
+}
+$$("[data-react]").forEach(box => {
+  box.innerHTML = EMOJIS.map(e => `<button type="button" aria-label="Reagir ${e}">${e}</button>`).join("");
+  box.querySelectorAll("button").forEach(b => b.onclick = () => {
+    floatEmoji(b.textContent);
+    if (S.ch) S.ch.send({ type: "broadcast", event: "reacao", payload: { e: b.textContent } });
+  });
+});
+
+/* ---------- rules ---------- */
+$("rulesHome").innerHTML = RULES_HTML; $("rulesFull").innerHTML = RULES_HTML;
+$("hdrRules").onclick = () => $("rulesSheet").hidden = false;
+$("rulesClose").onclick = () => $("rulesSheet").hidden = true;
+$("rulesSheet").onclick = e => { if (e.target.id === "rulesSheet") $("rulesSheet").hidden = true; };
+
+/* ---------- boot ---------- */
+$("nome").value = me.nome || "";
+const fromUrl = (new URLSearchParams(location.search).get("sala") || "").toUpperCase();
+if (/^[A-Z]{4}$/.test(fromUrl)) $("codigo").value = fromUrl;
+if (!sb) erroHome("O jogo está sem conexão com o servidor.");
+else {
+  const salva = store.get("mosca_sala", null);
+  const alvo = /^[A-Z]{4}$/.test(fromUrl) ? fromUrl : salva;
+  if (alvo && me.nome && (alvo === salva)) { S.code = alvo; assinar(alvo); refresh(); }
+}
+render();
+</script>
+<script src="../../game-theme.js"></script></body>
+</html>
