@@ -26,6 +26,12 @@ body[data-game=bagunca] .games .game:last-child{grid-column:1/-1}
 body[data-game=bagunca] .game b{line-height:1.25;overflow-wrap:anywhere}
 body[data-game=bagunca] .game .e{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#ffffff09;color:var(--accent);margin-bottom:4px}
 body[data-game=bagunca] .game .e .ui-icon{width:25px;height:25px}
+.badge-art{width:92px;height:92px;border-radius:50%;background:#ffffff1f;display:grid;place-items:center;margin-right:18px;transform:rotate(-10deg);box-shadow:0 6px 0 #00000030;flex-shrink:0}
+.badge-art .ui-icon{width:48px;height:48px;stroke-width:2}
+.telestrations{background:linear-gradient(130deg,#6b1f4a,#c44a85)}
+.proibido{background:linear-gradient(130deg,#7a1f1f,#c23b3b)}
+.quem-sou-eu{background:linear-gradient(130deg,#2a2d6b,#4f55b5)}
+.ito{background:linear-gradient(130deg,#6b4b12,#c98a2e)}
 .character-reference{display:flex;align-items:center;justify-content:center;gap:20px;min-height:230px;padding:22px 22px 54px;background:radial-gradient(ellipse at center,#fff,#eeeaf4);color:#271937}
 .character-reference img{width:65%;height:210px;object-fit:contain;max-width:260px}
 .character-reference img.hidden-color{filter:grayscale(1)}
